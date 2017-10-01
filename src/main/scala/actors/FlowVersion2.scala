@@ -7,13 +7,12 @@ import akka.actor.ActorSystem
 import akka.stream.scaladsl.{FileIO, Flow, Framing, Keep, RunnableGraph, Sink, Source}
 import akka.stream.{ActorMaterializer, IOResult}
 import akka.util.ByteString
-import model.Event
-import model.EventMarshlling._
+import model.{Event, EventMarshalling}
 import spray.json._
 
 import scala.concurrent.Future
 
-object FlowVersion2 extends App {
+object FlowVersion2 extends App with EventMarshalling {
 
   val spath = Paths.get("/home/harmeet/workspace/oculus-analytics/logs/storeserv_lagom-2017-09-26.1.log")
   val source: Source[ByteString, Future[IOResult]] = FileIO.fromPath(spath)
