@@ -46,4 +46,8 @@ object FlowVersion1 extends App with EventMarshalling {
     println(s"${result.status}, ${result.count} bytes Write")
     system.terminate()
   }
+
+  val flow: Flow[Int, Int, NotUsed] =Flow[Int].fold[Int](0){ (x, y)=> x+y}
+
+  val sample: Source[Int, NotUsed] = Source (1 to 10).viaMat(flow)(Keep.right)
 }
