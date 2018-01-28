@@ -12,7 +12,7 @@ import util.LogStreamProcessor
   */
 object BidiFlowComponent extends App {
 
- /* val inFlow: Flow[ByteString, Event, NotUsed] = if(args(0).toLowerCase() == "json") {
+  /* val inFlow: Flow[ByteString, Event, NotUsed] = if(args(0).toLowerCase() == "json") {
     JsonFraming.objectScanner(102400)
       .map(_.decodeString("UTF8").parseJson.convertTo[Event])
   } else {

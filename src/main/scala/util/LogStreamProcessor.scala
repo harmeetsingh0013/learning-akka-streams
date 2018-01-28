@@ -12,6 +12,7 @@ import scala.concurrent.Future
 import scala.concurrent.duration.FiniteDuration
 
 object LogStreamProcessor extends EventMarshalling {
+
   /**
     * Returns a Source of log lines from File.
     */
@@ -27,15 +28,17 @@ object LogStreamProcessor extends EventMarshalling {
   /**
     * Returns a Source of Framed byte strings using "\n" as a delimiter.
     */
-  def delimitedText[T](source: Source[ByteString, T], maxLine: Int): Source[String, T] =
+  def delimitedText[T](source: Source[ByteString, T],
+                       maxLine: Int): Source[String, T] =
     convertToString(source.via(Framing.delimiter(ByteString("\n"), maxLine)))
 
   /**
     * Returns a Source of Events from a Source of Strings.
     */
   def parseLogEvents[T](source: Source[String, T]): Source[Event, T] =
-    source.map(parseLineEx)
-      .collect{ case Some(e) => e }
+    source
+      .map(parseLineEx)
+      .collect { case Some(e) => e }
 
   /**
     * Returns a source which only includes error events.
@@ -52,7 +55,8 @@ object LogStreamProcessor extends EventMarshalling {
                 duration: FiniteDuration): Source[Seq[Event], T] =
     source.filter(predicate).groupedWithin(nrEvents, duration)
 
-  def convertToJsonBytes[T](flow: Flow[Seq[Event], Seq[Event], T]): Flow[Seq[Event], ByteString, T] =
+  def convertToJsonBytes[T](
+      flow: Flow[Seq[Event], Seq[Event], T]): Flow[Seq[Event], ByteString, T] =
     flow.map(events => ByteString(events.toJson.compactPrint))
 
   /**
@@ -70,8 +74,10 @@ object LogStreamProcessor extends EventMarshalling {
   /**
     * Returns a Source of JSON Strings from a Source of chunked ByteStrings.
     */
-  def jsonText[T](source: Source[ByteString, T], maxObject: Int): Source[String, T] =
-    convertToString(source.via(akka.stream.scaladsl.JsonFraming.objectScanner(maxObject)))
+  def jsonText[T](source: Source[ByteString, T],
+                  maxObject: Int): Source[String, T] =
+    convertToString(
+      source.via(akka.stream.scaladsl.JsonFraming.objectScanner(maxObject)))
 
   /**
     * Returns a Source of [[Event]]s from a Source of framed ByteStrings.
@@ -83,16 +89,17 @@ object LogStreamProcessor extends EventMarshalling {
     * parses text log line into an Event
     */
   def parseLineEx(line: String): Option[Event] = {
-    if(!line.isEmpty) {
+    if (!line.isEmpty) {
       line.split("\\s+", 5) match {
         case Array(t1, t2, thread, log, description) =>
-          Some(Event(
-            t1 = t1,
-            t2 = t2,
-            thread = thread,
-            log = log,
-            description = description
-          ))
+          Some(
+            Event(
+              t1 = t1,
+              t2 = t2,
+              thread = thread,
+              log = log,
+              description = description
+            ))
         case x =>
           throw new LogParseException(s"Failed on line: $line")
       }
@@ -103,5 +110,5 @@ object LogStreamProcessor extends EventMarshalling {
     s"""${event.t1} ${event.t2} ${event.thread} ${event.log} | ${event.description} \n"""
   }
 
-  case class LogParseException(msg:String) extends Exception(msg)
+  case class LogParseException(msg: String) extends Exception(msg)
 }

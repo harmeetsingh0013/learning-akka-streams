@@ -29,7 +29,7 @@ object GraphDSLCloseGraph extends App {
 
   implicit val system = ActorSystem("akka-stream")
   implicit val ec = system.dispatcher
-  implicit  val materializer = ActorMaterializer()
+  implicit val materializer = ActorMaterializer()
 
   graph.run(materializer)
 }
